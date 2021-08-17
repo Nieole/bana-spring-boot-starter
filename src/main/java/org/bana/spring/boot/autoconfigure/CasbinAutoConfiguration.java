@@ -3,18 +3,15 @@ package org.bana.spring.boot.autoconfigure;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import org.bana.adapter.JpaPermissionAdapter;
-import org.bana.adapter.JpaRoleAdapter;
-import org.bana.adapter.JpaRuleAdapter;
-import org.bana.adapter.JpaUserAdapter;
+import org.bana.adapter.PermissionAdapter;
+import org.bana.adapter.RoleAdapter;
+import org.bana.adapter.RuleAdapter;
+import org.bana.adapter.UserAdapter;
 import org.bana.entity.Permission;
 import org.bana.entity.Role;
 import org.bana.entity.User;
 import org.bana.exception.CasbinModelConfigNotFoundException;
 import org.bana.repository.JpaRuleRepository;
-import org.bana.service.JpaPermissionService;
-import org.bana.service.JpaRoleService;
-import org.bana.service.JpaUserService;
 import org.bana.service.PermissionService;
 import org.bana.service.RoleService;
 import org.bana.service.UserService;
@@ -121,65 +118,65 @@ public class CasbinAutoConfiguration {
   public Adapter autoConfigJpaAdapter(
       JpaRuleRepository jpaRuleRepository
   ) {
-    return new JpaRuleAdapter(jpaRuleRepository);
+    return new RuleAdapter(jpaRuleRepository);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public UserService<User, String> userService(
-      JpaUserAdapter jpaUserAdapter,
+  public UserService userService(
+      UserAdapter jpaUserAdapter,
       Enforcer enforcer,
-      RoleService<Role, String> roleService
+      RoleService roleService
   ) {
-    return new JpaUserService(jpaUserAdapter, enforcer, roleService);
+    return new UserService(jpaUserAdapter, enforcer, roleService);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public JpaUserAdapter jpaUserAdapter(
+  public UserAdapter jpaUserAdapter(
       JpaRepository<User, String> repository
   ) {
-    return new JpaUserAdapter(repository);
+    return new UserAdapter(repository);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public JpaRoleAdapter jpaRoleAdapter(
+  public RoleAdapter jpaRoleAdapter(
       JpaRepository<Role, String> repository
   ) {
-    return new JpaRoleAdapter(repository);
+    return new RoleAdapter(repository);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public JpaPermissionAdapter jpaPermissionAdapter(
+  public PermissionAdapter jpaPermissionAdapter(
       JpaRepository<Permission, String> repository
   ) {
-    return new JpaPermissionAdapter(repository);
+    return new PermissionAdapter(repository);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public RoleService<Role, String> roleService(
-      JpaRoleAdapter jpaRoleAdapter,
+  public RoleService roleService(
+      RoleAdapter jpaRoleAdapter,
       Enforcer enforcer,
-      PermissionService<Permission, String> permissionService
+      PermissionService permissionService
   ) {
-    return new JpaRoleService(jpaRoleAdapter, enforcer, permissionService);
+    return new RoleService(jpaRoleAdapter, enforcer, permissionService);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public PermissionService<Permission, String> permissionService(
-      JpaPermissionAdapter jpaPermissionAdapter,
+  public PermissionService permissionService(
+      PermissionAdapter jpaPermissionAdapter,
       Enforcer enforcer
   ) {
-    return new JpaPermissionService(jpaPermissionAdapter, enforcer);
+    return new PermissionService(jpaPermissionAdapter, enforcer);
   }
 }
