@@ -14,7 +14,12 @@ repositories {
 dependencies {
     api 'org.bana:bana:0.0.1-SNAPSHOT'
     implementation 'org.bana:bana-mybatis-adapter:0.0.1-SNAPSHOT'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0'
+    implementation 'com.baomidou:mybatis-plus-boot-starter:3.4.3.1'
+
     implementation 'org.bana:bana-jpa-adapter:0.0.1-SNAPSHOT'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.3'
+
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'

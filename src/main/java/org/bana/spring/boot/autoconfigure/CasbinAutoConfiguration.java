@@ -5,7 +5,15 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import org.bana.exception.CasbinModelConfigNotFoundException;
 import org.bana.jpa.repository.JpaRuleRepository;
+import org.bana.jpa.service.JpaRoleService;
+import org.bana.jpa.service.JpaUserService;
 import org.bana.mybatis.repository.MybatisRuleRepository;
+import org.bana.mybatis.service.MybatisPermissionService;
+import org.bana.mybatis.service.MybatisRoleService;
+import org.bana.mybatis.service.MybatisUserService;
+import org.bana.service.PermissionService;
+import org.bana.service.RoleService;
+import org.bana.service.UserService;
 import org.bana.spring.boot.autoconfigure.properties.CasbinProperties;
 import org.casbin.jcasbin.main.Enforcer;
 import org.casbin.jcasbin.main.SyncedEnforcer;
@@ -25,8 +33,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EntityScan(value = {"org.bana.jpa.entity"})
-@EnableJpaRepositories(value = {"org.bana.jpa"})
+@EntityScan(value = {"org.bana"})
+@EnableJpaRepositories(value = {"org.bana"})
 @ComponentScan(value = {"org.bana"})
 @EnableConfigurationProperties({CasbinProperties.class})
 @ConditionalOnExpression("${casbin.enableCasbin:true}")
@@ -142,33 +150,33 @@ public class CasbinAutoConfiguration {
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public org.bana.jpa.service.RoleService roleService(
+  public RoleService<org.bana.jpa.entity.Role,String> roleService(
       org.bana.jpa.adapter.RoleAdapter jpaRoleAdapter,
       Enforcer enforcer,
-      org.bana.jpa.service.PermissionService permissionService
+      org.bana.jpa.service.JpaPermissionService permissionService
   ) {
-    return new org.bana.jpa.service.RoleService(jpaRoleAdapter, enforcer, permissionService);
+    return new JpaRoleService(jpaRoleAdapter, enforcer, permissionService);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public org.bana.jpa.service.PermissionService permissionService(
+  public PermissionService<org.bana.jpa.entity.Permission,String> permissionService(
       org.bana.jpa.adapter.PermissionAdapter jpaPermissionAdapter,
       Enforcer enforcer
   ) {
-    return new org.bana.jpa.service.PermissionService(jpaPermissionAdapter, enforcer);
+    return new org.bana.jpa.service.JpaPermissionService(jpaPermissionAdapter, enforcer);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public org.bana.jpa.service.UserService userService(
+  public UserService<org.bana.jpa.entity.User,String> userService(
       org.bana.jpa.adapter.UserAdapter jpaUserAdapter,
       Enforcer enforcer,
-      org.bana.jpa.service.RoleService roleService
+      JpaRoleService roleService
   ) {
-    return new org.bana.jpa.service.UserService(jpaUserAdapter, enforcer, roleService);
+    return new JpaUserService(jpaUserAdapter, enforcer, roleService);
   }
 
 
@@ -220,33 +228,33 @@ public class CasbinAutoConfiguration {
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
   @ConditionalOnMissingBean
-  public org.bana.mybatis.service.UserService mybatisUserService(
+  public UserService<org.bana.mybatis.entity.User,String> mybatisUserService(
       org.bana.mybatis.adapter.UserAdapter userAdapter,
       Enforcer enforcer,
-      org.bana.mybatis.service.RoleService roleService
+      MybatisRoleService roleService
   ){
-    return new org.bana.mybatis.service.UserService(userAdapter,enforcer,roleService);
+    return new MybatisUserService(userAdapter,enforcer,roleService);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
   @ConditionalOnMissingBean
-  public org.bana.mybatis.service.RoleService mybatisRoleService(
+  public RoleService<org.bana.mybatis.entity.Role,String> mybatisRoleService(
       org.bana.mybatis.adapter.RoleAdapter roleAdapter,
       Enforcer enforcer,
-      org.bana.mybatis.service.PermissionService permissionService
+      MybatisPermissionService permissionService
   ){
-    return new org.bana.mybatis.service.RoleService(roleAdapter,enforcer,permissionService);
+    return new MybatisRoleService(roleAdapter,enforcer,permissionService);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
   @ConditionalOnMissingBean
-  public org.bana.mybatis.service.PermissionService mybatisPermissionService(
+  public PermissionService<org.bana.mybatis.entity.Permission,String> mybatisPermissionService(
       org.bana.mybatis.adapter.PermissionAdapter permissionAdapter,
       Enforcer enforcer
   ){
-    return new org.bana.mybatis.service.PermissionService(permissionAdapter,enforcer);
+    return new MybatisPermissionService(permissionAdapter,enforcer);
   }
 
   @Bean
