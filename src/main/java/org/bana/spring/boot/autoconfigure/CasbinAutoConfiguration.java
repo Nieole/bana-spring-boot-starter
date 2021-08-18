@@ -3,18 +3,9 @@ package org.bana.spring.boot.autoconfigure;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import org.bana.adapter.PermissionAdapter;
-import org.bana.adapter.RoleAdapter;
-import org.bana.adapter.RuleAdapter;
-import org.bana.adapter.UserAdapter;
-import org.bana.entity.Permission;
-import org.bana.entity.Role;
-import org.bana.entity.User;
 import org.bana.exception.CasbinModelConfigNotFoundException;
-import org.bana.repository.JpaRuleRepository;
-import org.bana.service.PermissionService;
-import org.bana.service.RoleService;
-import org.bana.service.UserService;
+import org.bana.jpa.repository.JpaRuleRepository;
+import org.bana.mybatis.repository.MybatisRuleRepository;
 import org.bana.spring.boot.autoconfigure.properties.CasbinProperties;
 import org.casbin.jcasbin.main.Enforcer;
 import org.casbin.jcasbin.main.SyncedEnforcer;
@@ -34,8 +25,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EntityScan(value = {"org.bana.entity"})
-@EnableJpaRepositories(value = {"org.bana"})
+@EntityScan(value = {"org.bana.jpa.entity"})
+@EnableJpaRepositories(value = {"org.bana.jpa"})
 @ComponentScan(value = {"org.bana"})
 @EnableConfigurationProperties({CasbinProperties.class})
 @ConditionalOnExpression("${casbin.enableCasbin:true}")
@@ -118,65 +109,111 @@ public class CasbinAutoConfiguration {
   public Adapter autoConfigJpaAdapter(
       JpaRuleRepository jpaRuleRepository
   ) {
-    return new RuleAdapter(jpaRuleRepository);
+    return new org.bana.jpa.adapter.RuleAdapter(jpaRuleRepository);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public UserService userService(
-      UserAdapter jpaUserAdapter,
+  public org.bana.jpa.adapter.UserAdapter jpaUserAdapter(
+      JpaRepository<org.bana.jpa.entity.User, String> repository
+  ) {
+    return new org.bana.jpa.adapter.UserAdapter(repository);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
+  @ConditionalOnMissingBean
+  public org.bana.jpa.adapter.RoleAdapter jpaRoleAdapter(
+      JpaRepository<org.bana.jpa.entity.Role, String> repository
+  ) {
+    return new org.bana.jpa.adapter.RoleAdapter(repository);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
+  @ConditionalOnMissingBean
+  public org.bana.jpa.adapter.PermissionAdapter jpaPermissionAdapter(
+      JpaRepository<org.bana.jpa.entity.Permission, String> repository
+  ) {
+    return new org.bana.jpa.adapter.PermissionAdapter(repository);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
+  @ConditionalOnMissingBean
+  public org.bana.jpa.service.RoleService roleService(
+      org.bana.jpa.adapter.RoleAdapter jpaRoleAdapter,
       Enforcer enforcer,
-      RoleService roleService
+      org.bana.jpa.service.PermissionService permissionService
   ) {
-    return new UserService(jpaUserAdapter, enforcer, roleService);
+    return new org.bana.jpa.service.RoleService(jpaRoleAdapter, enforcer, permissionService);
   }
 
   @Bean
   @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
   @ConditionalOnMissingBean
-  public UserAdapter jpaUserAdapter(
-      JpaRepository<User, String> repository
-  ) {
-    return new UserAdapter(repository);
-  }
-
-  @Bean
-  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
-  @ConditionalOnMissingBean
-  public RoleAdapter jpaRoleAdapter(
-      JpaRepository<Role, String> repository
-  ) {
-    return new RoleAdapter(repository);
-  }
-
-  @Bean
-  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
-  @ConditionalOnMissingBean
-  public PermissionAdapter jpaPermissionAdapter(
-      JpaRepository<Permission, String> repository
-  ) {
-    return new PermissionAdapter(repository);
-  }
-
-  @Bean
-  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
-  @ConditionalOnMissingBean
-  public RoleService roleService(
-      RoleAdapter jpaRoleAdapter,
-      Enforcer enforcer,
-      PermissionService permissionService
-  ) {
-    return new RoleService(jpaRoleAdapter, enforcer, permissionService);
-  }
-
-  @Bean
-  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
-  @ConditionalOnMissingBean
-  public PermissionService permissionService(
-      PermissionAdapter jpaPermissionAdapter,
+  public org.bana.jpa.service.PermissionService permissionService(
+      org.bana.jpa.adapter.PermissionAdapter jpaPermissionAdapter,
       Enforcer enforcer
   ) {
-    return new PermissionService(jpaPermissionAdapter, enforcer);
+    return new org.bana.jpa.service.PermissionService(jpaPermissionAdapter, enforcer);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "jpa")
+  @ConditionalOnMissingBean
+  public org.bana.jpa.service.UserService userService(
+      org.bana.jpa.adapter.UserAdapter jpaUserAdapter,
+      Enforcer enforcer,
+      org.bana.jpa.service.RoleService roleService
+  ) {
+    return new org.bana.jpa.service.UserService(jpaUserAdapter, enforcer, roleService);
+  }
+
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
+  @ConditionalOnMissingBean
+  public Adapter autoConfigMybatisAdapter(
+      MybatisRuleRepository mybatisRuleRepository
+  ) {
+    return new org.bana.mybatis.adapter.RuleAdapter(mybatisRuleRepository);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
+  @ConditionalOnMissingBean
+  public org.bana.mybatis.adapter.RuleAdapter mybatisRuleAdapter(
+      MybatisRuleRepository mybatisRuleRepository
+  ){
+    return new org.bana.mybatis.adapter.RuleAdapter(mybatisRuleRepository);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
+  @ConditionalOnMissingBean
+  public org.bana.mybatis.adapter.RoleAdapter mybatisRoleAdapter(
+      org.bana.mybatis.repository.RoleRepository roleRepository
+  ){
+    return new org.bana.mybatis.adapter.RoleAdapter(roleRepository);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
+  @ConditionalOnMissingBean
+  public org.bana.mybatis.adapter.UserAdapter mybatisUserAdapter(
+      org.bana.mybatis.repository.UserRepository userRepository
+  ){
+    return new org.bana.mybatis.adapter.UserAdapter(userRepository);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
+  @ConditionalOnMissingBean
+  public org.bana.mybatis.adapter.PermissionAdapter mybatisPermissionAdapter(
+      org.bana.mybatis.repository.PermissionRepository permissionRepository
+  ){
+    return new org.bana.mybatis.adapter.PermissionAdapter(permissionRepository);
   }
 }
