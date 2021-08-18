@@ -216,4 +216,44 @@ public class CasbinAutoConfiguration {
   ){
     return new org.bana.mybatis.adapter.PermissionAdapter(permissionRepository);
   }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
+  @ConditionalOnMissingBean
+  public org.bana.mybatis.service.UserService mybatisUserService(
+      org.bana.mybatis.adapter.UserAdapter userAdapter,
+      Enforcer enforcer,
+      org.bana.mybatis.service.RoleService roleService
+  ){
+    return new org.bana.mybatis.service.UserService(userAdapter,enforcer,roleService);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
+  @ConditionalOnMissingBean
+  public org.bana.mybatis.service.RoleService mybatisRoleService(
+      org.bana.mybatis.adapter.RoleAdapter roleAdapter,
+      Enforcer enforcer,
+      org.bana.mybatis.service.PermissionService permissionService
+  ){
+    return new org.bana.mybatis.service.RoleService(roleAdapter,enforcer,permissionService);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
+  @ConditionalOnMissingBean
+  public org.bana.mybatis.service.PermissionService mybatisPermissionService(
+      org.bana.mybatis.adapter.PermissionAdapter permissionAdapter,
+      Enforcer enforcer
+  ){
+    return new org.bana.mybatis.service.PermissionService(permissionAdapter,enforcer);
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "casbin.storeType", havingValue = "mybatis")
+  @ConditionalOnMissingBean
+  public org.bana.mybatis.entity.XidIdGenerator xidIdGenerator(){
+    return new org.bana.mybatis.entity.XidIdGenerator();
+  }
+
 }
